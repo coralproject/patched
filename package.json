@@ -4,7 +4,7 @@
   },
   "peerDependencies": {
     "relay-compiler": "*",
-    "relay-runtime": "*",
+    "relay-runtime": "*"
   },
   "dependencies": {
     "babel-runtime": "^6.23.0",
