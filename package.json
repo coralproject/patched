@@ -3,7 +3,7 @@
     "url": "https://github.com/facebook/relay/issues"
   },
   "dependencies": {
-    "relay-runtime": "file:../relay-runtime",
+    "relay-runtime": "github:coralproject/patched#relay-compiler",
     "babel-generator": "^6.26.0",
     "babel-polyfill": "^6.20.0",
     "babel-preset-fbjs": "^2.1.4",
