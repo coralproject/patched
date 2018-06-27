@@ -2,8 +2,10 @@
   "bugs": {
     "url": "https://github.com/facebook/relay/issues"
   },
+  "peerDependencies": {
+    "relay-runtime": "*"
+  },
   "dependencies": {
-    "relay-runtime": "github:coralproject/patched#relay-runtime",
     "babel-generator": "^6.26.0",
     "babel-polyfill": "^6.20.0",
     "babel-preset-fbjs": "^2.1.4",
