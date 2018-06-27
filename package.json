@@ -33,5 +33,8 @@
     "type": "git",
     "url": "git+https://github.com/facebook/relay.git"
   },
+  "bin": {
+    "relay-compiler": "bin/relay-compiler"
+  },
   "version": "1.5.0-artsy.5"
 }
