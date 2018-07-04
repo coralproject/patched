@@ -1,4 +1,7 @@
-# @types/relay-runtime
+# @types/react-relay
 
-- Fixed type `commitLocalUpdate` to actually return a function not just the type.
-- Fixed type `RecordSourceProxy.get` to not return an array.
+- Added generic parameters to `ConnectionConfig`
+- Added generic parameters to `QueryRendererProps`
+- Added generic parameters to `ReadyState`
+- Change `ConnectionData.edges` to ReadonlyArray
+- Fix wrong type `FragmentVariablesGetter`
