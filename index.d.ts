@@ -5,8 +5,13 @@
 //                 Eloy Durán <https://github.com/alloy>
 //                 Nicolas Pirotte <https://github.com/npirotte>
 //                 Cameron Knight <https://github.com/ckknight>
+//                 Kaare Hoff Skovgaard <https://github.com/kastermester>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
-// TypeScript Version: 2.6
+// TypeScript Version: 2.9
+
+// Prettified with:
+// $ prettier --parser typescript --tab-width 4 --semi --trailing-comma es5 --write --print-width 120 \
+//   types/{react-relay,relay-runtime}/{,*}/*.ts*
 
 export {
     commitLocalUpdate,
@@ -14,115 +19,120 @@ export {
     fetchRelayModernQuery as fetchQuery,
     GraphQLTaggedNode,
     requestRelaySubscription as requestSubscription,
-} from "relay-runtime";
-
-import * as React from "react";
-import * as RelayRuntimeTypes from "relay-runtime";
-
-// ~~~~~~~~~~~~~~~~~~~~~
-// Utility types
-// ~~~~~~~~~~~~~~~~~~~~~
-
-// Taken from https://github.com/pelotom/type-zoo
-// tslint:disable-next-line:strict-export-declare-modifiers
-type Omit<T, K extends keyof T> = Pick<T, ({ [P in keyof T]: P } & { [P in K]: never } & { [x: string]: never, [x: number]: never })[keyof T]>;
-
-export type RemoveRelayProp<P> = Omit<P & { relay: never }, "relay">;
-
-export interface ComponentRef {
+  } from "relay-runtime";
+  
+  import * as React from "react";
+  import * as RelayRuntimeTypes from "relay-runtime";
+  
+  // ~~~~~~~~~~~~~~~~~~~~~
+  // Utility types
+  // ~~~~~~~~~~~~~~~~~~~~~
+  
+  export interface _RefType<T> {
+    " $refType": T;
+  }
+  export interface _FragmentRefs<T> {
+    " $fragmentRefs": T;
+  }
+  
+  export type FragmentOrRegularProp<T> = T extends _RefType<infer U>
+    ? _FragmentRefs<U>
+    : T extends ReadonlyArray<_RefType<infer U>> ? ReadonlyArray<_FragmentRefs<U>> : T;
+  
+  export type MappedFragmentProps<T> = { [K in keyof T]: FragmentOrRegularProp<T[K]> };
+  
+  export type RemoveRelayProp<P> = Pick<P, Exclude<keyof P, "relay">>;
+  
+  export interface ComponentRef {
     componentRef?: (ref: any) => void;
-}
-
-export type RelayContainer<T> = React.ComponentType<RemoveRelayProp<T> & ComponentRef>;
-
-// ~~~~~~~~~~~~~~~~~~~~~
-// Maybe Fix
-// ~~~~~~~~~~~~~~~~~~~~~
-export type ConcreteFragmentDefinition = object;
-export type ConcreteOperationDefinition = object;
-
-// ~~~~~~~~~~~~~~~~~~~~~
-// RelayProp
-// ~~~~~~~~~~~~~~~~~~~~~
-// note: refetch and pagination containers augment this
-export interface RelayProp {
+  }
+  
+  export type RelayContainer<P> = React.ComponentType<MappedFragmentProps<RemoveRelayProp<P>> & ComponentRef>;
+  
+  // ~~~~~~~~~~~~~~~~~~~~~
+  // Maybe Fix
+  // ~~~~~~~~~~~~~~~~~~~~~
+  export type ConcreteFragmentDefinition = object;
+  export type ConcreteOperationDefinition = object;
+  
+  // ~~~~~~~~~~~~~~~~~~~~~
+  // RelayProp
+  // ~~~~~~~~~~~~~~~~~~~~~
+  // note: refetch and pagination containers augment this
+  export interface RelayProp {
     environment: RelayRuntimeTypes.Environment;
-}
-
-// ~~~~~~~~~~~~~~~~~~~~~
-// RelayQL
-// ~~~~~~~~~~~~~~~~~~~~~
-export function RelayQL(strings: string[], ...substitutions: any[]): RelayRuntimeTypes.RelayConcreteNode;
-
-// ~~~~~~~~~~~~~~~~~~~~~
-// ReactRelayTypes
-// ~~~~~~~~~~~~~~~~~~~~~
-export interface GeneratedNodeMap {
+  }
+  
+  // ~~~~~~~~~~~~~~~~~~~~~
+  // RelayQL
+  // ~~~~~~~~~~~~~~~~~~~~~
+  export function RelayQL(strings: string[], ...substitutions: any[]): RelayRuntimeTypes.RelayConcreteNode;
+  
+  // ~~~~~~~~~~~~~~~~~~~~~
+  // ReactRelayTypes
+  // ~~~~~~~~~~~~~~~~~~~~~
+  export interface GeneratedNodeMap {
     [key: string]: RelayRuntimeTypes.GraphQLTaggedNode;
-}
-
-/**
- * Runtime function to correspond to the `graphql` tagged template function.
- * All calls to this function should be transformed by the plugin.
- */
-export interface GraphqlInterface {
+  }
+  
+  /**
+  * Runtime function to correspond to the `graphql` tagged template function.
+  * All calls to this function should be transformed by the plugin.
+  */
+  export interface GraphqlInterface {
     (strings: string[] | TemplateStringsArray): RelayRuntimeTypes.GraphQLTaggedNode;
     experimental(strings: string[] | TemplateStringsArray): RelayRuntimeTypes.GraphQLTaggedNode;
-}
-export const graphql: GraphqlInterface;
-
-// CHANGED: (cvle) added AnyProps.
-export interface AnyProps {
-  [propName: string]: any
-}
-
-// ~~~~~~~~~~~~~~~~~~~~~
-// ReactRelayQueryRenderer
-// ~~~~~~~~~~~~~~~~~~~~~
-// Changed: (cvle) added Generics.
-export interface QueryRendererProps<V =  RelayRuntimeTypes.Variables, P = AnyProps> {
+  }
+  export const graphql: GraphqlInterface;
+  
+  // ~~~~~~~~~~~~~~~~~~~~~
+  // ReactRelayQueryRenderer
+  // ~~~~~~~~~~~~~~~~~~~~~
+  
+  export interface QueryRendererProps<T extends RelayRuntimeTypes.OperationBase = RelayRuntimeTypes.OperationDefaults> {
     cacheConfig?: RelayRuntimeTypes.CacheConfig;
     environment: RelayRuntimeTypes.Environment;
     query?: RelayRuntimeTypes.GraphQLTaggedNode | null;
-    render(readyState: ReadyState<P>): React.ReactElement<any> | undefined | null;
-    variables: RelayRuntimeTypes.Variables;
+    render(readyState: ReadyState<T["response"]>): React.ReactElement<any> | undefined | null;
+    variables: T["variables"];
     rerunParamExperimental?: RelayRuntimeTypes.RerunParam;
-}
-
-// CHANGED: (cvle) Added Generic variable P.
-export interface ReadyState<P = AnyProps> {
+  }
+  export interface ReadyState<T extends RelayRuntimeTypes.Variables = RelayRuntimeTypes.Variables> {
     error: Error | undefined | null;
-    props: P | undefined | null;
+    props: T | undefined | null;
     retry?(): void;
-}
-export interface QueryRendererState {
-    readyState: ReadyState;
-}
-export class ReactRelayQueryRenderer extends React.Component<QueryRendererProps, QueryRendererState> {}
-export class QueryRenderer extends ReactRelayQueryRenderer {}
-
-// ~~~~~~~~~~~~~~~~~~~~~
-// createFragmentContainer
-// ~~~~~~~~~~~~~~~~~~~~~
-export function createFragmentContainer<T>(
-    Component: React.ComponentType<T>,
+  }
+  
+  export class ReactRelayQueryRenderer<T extends RelayRuntimeTypes.OperationBase> extends React.Component<
+    QueryRendererProps<T>
+  > {}
+  export class QueryRenderer<
+    T extends RelayRuntimeTypes.OperationBase = RelayRuntimeTypes.OperationDefaults
+  > extends ReactRelayQueryRenderer<T> {}
+  
+  // ~~~~~~~~~~~~~~~~~~~~~
+  // createFragmentContainer
+  // ~~~~~~~~~~~~~~~~~~~~~
+  
+  export function createFragmentContainer<P>(
+    Component: React.ComponentType<P>,
     fragmentSpec: RelayRuntimeTypes.GraphQLTaggedNode | GeneratedNodeMap
-): RelayContainer<T>;
-
-// ~~~~~~~~~~~~~~~~~~~~~
-// createPaginationContainer
-// ~~~~~~~~~~~~~~~~~~~~~
-export interface PageInfo {
+  ): RelayContainer<P>;
+  
+  // ~~~~~~~~~~~~~~~~~~~~~
+  // createPaginationContainer
+  // ~~~~~~~~~~~~~~~~~~~~~
+  export interface PageInfo {
     endCursor: string | undefined | null;
     hasNextPage: boolean;
     hasPreviousPage: boolean;
     startCursor: string | undefined | null;
-}
-export interface ConnectionData {
-    edges?: ReadonlyArray<any>; // CHANGED: (cvle) Changed to ReadonlyArray
-    pageInfo?: PageInfo;
-}
-export type RelayPaginationProp = RelayProp & {
+  }
+  export interface ConnectionData {
+    edges?: ReadonlyArray<any>;
+    pageInfo?: Partial<PageInfo>;
+  }
+  export type RelayPaginationProp = RelayProp & {
     hasMore(): boolean;
     isLoading(): boolean;
     loadMore(
@@ -135,40 +145,40 @@ export type RelayPaginationProp = RelayProp & {
         callback: (error?: Error) => void,
         refetchVariables?: RelayRuntimeTypes.Variables
     ): RelayRuntimeTypes.Disposable | undefined | null;
-};
-
-// CHANGED: (cvle) Fix type and add generic.
-export type FragmentVariablesGetter<V = RelayRuntimeTypes.Variables> = (
+  };
+  
+  // CHANGED: (cvle) Fix type and add generic.
+  export type FragmentVariablesGetter<V extends RelayRuntimeTypes.Variables = RelayRuntimeTypes.Variables> = (
     prevVars: V,
     totalCount: number
-) => V;
-
-// CHANGED: (cvle) Improved Generic Types.
-export interface ConnectionConfig<T = AnyProps, F = RelayRuntimeTypes.Variables, V = RelayRuntimeTypes.Variables> {
+  ) => V;
+  
+  // CHANGED: (cvle) Improved Generic Types.
+  export interface ConnectionConfig<P, F extends RelayRuntimeTypes.Variables = RelayRuntimeTypes.Variables, V extends RelayRuntimeTypes.Variables = RelayRuntimeTypes.Variables> {
     direction?: "backward" | "forward";
-    getConnectionFromProps?(props: T): ConnectionData | undefined | null;
+    getConnectionFromProps?(props: P): ConnectionData | undefined | null;
     getFragmentVariables?: FragmentVariablesGetter<F>;
     getVariables(
-        props: T,
+        props: P,
         paginationInfo: { count: number; cursor?: string },
         fragmentVariables: F
     ): V;
     query: RelayRuntimeTypes.GraphQLTaggedNode;
-}
-export function createPaginationContainer<T>(
-    Component: React.ComponentType<T>,
+  }
+  export function createPaginationContainer<P>(
+    Component: React.ComponentType<P>,
     fragmentSpec: RelayRuntimeTypes.GraphQLTaggedNode | GeneratedNodeMap,
-    connectionConfig: ConnectionConfig<T>
-): RelayContainer<T>;
-
-// ~~~~~~~~~~~~~~~~~~~~~
-// createRefetchContainer
-// ~~~~~~~~~~~~~~~~~~~~~
-export interface RefetchOptions {
+    connectionConfig: ConnectionConfig<P>
+  ): RelayContainer<P>;
+  
+  // ~~~~~~~~~~~~~~~~~~~~~
+  // createRefetchContainer
+  // ~~~~~~~~~~~~~~~~~~~~~
+  export interface RefetchOptions {
     force?: boolean;
     rerunParamExperimental?: RelayRuntimeTypes.RerunParam;
-}
-export type RelayRefetchProp = RelayProp & {
+  }
+  export type RelayRefetchProp = RelayProp & {
     refetch(
         refetchVariables:
             | RelayRuntimeTypes.Variables
@@ -177,9 +187,10 @@ export type RelayRefetchProp = RelayProp & {
         callback?: (error?: Error) => void,
         options?: RefetchOptions
     ): RelayRuntimeTypes.Disposable;
-};
-export function createRefetchContainer<T>(
-    Component: React.ComponentType<T>,
+  };
+  export function createRefetchContainer<P>(
+    Component: React.ComponentType<P>,
     fragmentSpec: RelayRuntimeTypes.GraphQLTaggedNode | GeneratedNodeMap,
     taggedNode: RelayRuntimeTypes.GraphQLTaggedNode
-): RelayContainer<T>;
+  ): RelayContainer<P>;
+  
