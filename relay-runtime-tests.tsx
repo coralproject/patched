@@ -6,13 +6,10 @@ import {
     ConnectionHandler,
     ViewerHandler,
     RecordSourceInspector,
-    MutationConfig,
-    commitLocalUpdate,
 } from "relay-runtime";
 
 const source = new RecordSource();
 const store = new Store(source);
-
 
 // ~~~~~~~~~~~~~~~~~~~~~
 // Network Layer
@@ -63,15 +60,3 @@ function handlerProvider(handle: any) {
 // ~~~~~~~~~~~~~~~~~~~~~
 
 const inspector = new RecordSourceInspector(source);
-
-// ~~~~~~~~~~~~~~~~~~~~~
-// Mutation
-// ~~~~~~~~~~~~~~~~~~~~~
-type MyMutationConfig = MutationConfig<{ payload: object }, { input: object }>;
-
-commitLocalUpdate(environment, s => {
-  const root = s.get("client:root");
-  if (root) {
-    root.setValue("val", "key");
-  }
-});
